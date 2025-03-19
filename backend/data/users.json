@@ -1,0 +1,82 @@
+[
+    {
+        "username": "janedoe",
+        "email": "jane.doe@example.com",
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "password": "password123",
+        "type": "Free"
+    },
+    {
+        "username": "johnsmith",
+        "email": "john.smith@example.com",
+        "firstName": "John",
+        "lastName": "Smith",
+        "password": "securepass",
+        "type": "Paid"
+    },
+    {
+        "username": "batman",
+        "email": "batman@example.com",
+        "firstName": "Bruce",
+        "lastName": "Wayne",
+        "password": "imBatman",
+        "type": "Paid"
+    },
+    {
+        "username": "supergirl",
+        "email": "kara.danvers@example.com",
+        "firstName": "Kara",
+        "lastName": "Danvers",
+        "password": "kryptonite",
+        "type": "Free"
+    },
+    {
+        "username": "spiderman",
+        "email": "peter.parker@example.com",
+        "firstName": "Peter",
+        "lastName": "Parker",
+        "password": "webShooter",
+        "type": "Paid"
+    },
+    {
+        "username": "wonderwoman",
+        "email": "diana.prince@example.com",
+        "firstName": "Diana",
+        "lastName": "Prince",
+        "password": "amazonWarrior",
+        "type": "Paid"
+    },
+    {
+        "username": "flash",
+        "email": "barry.allen@example.com",
+        "firstName": "Barry",
+        "lastName": "Allen",
+        "password": "speedforce",
+        "type": "Free"
+    },
+    {
+        "username": "aquaMan",
+        "email": "arthur.curry@example.com",
+        "firstName": "Arthur",
+        "lastName": "Curry",
+        "password": "oceanKing",
+        "type": "Free"
+    },
+    {
+        "username": "cyborg",
+        "email": "victor.stone@example.com",
+        "firstName": "Victor",
+        "lastName": "Stone",
+        "password": "halfRobot",
+        "type": "Paid"
+    },
+    {
+        "username": "greenlantern",
+        "email": "hal.jordan@example.com",
+        "firstName": "Hal",
+        "lastName": "Jordan",
+        "password": "lanternRing",
+        "type": "Free"
+    }
+]

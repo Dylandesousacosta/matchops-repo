@@ -1,0 +1,22 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "lookingforlove - Server",
+  "license": "ISC",
+  "author": "Group 2",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "index": "node index.js",
+    "refresh": "node index.js --refresh",
+    "watch": "node --watch index.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongodb": "^6.14.2",
+    "mongoose": "^8.12.1"
+  }
+}
