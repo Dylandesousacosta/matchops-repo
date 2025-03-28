@@ -3,22 +3,55 @@ logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
 lerna-debug.log*
+.pnpm-debug.log*
 
-node_modules/
-dist
-dist-ssr
-*.local
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+/node_modules
+/.pnp
+.pnp.js
+jspm_packages/
+
+# Testing
+/coverage
+.nyc_output
+.jest
+eslintcache
+
+# Build files
+/build
+/dist
+.next
+.nuxt
+out
+.cache
+.parcel-cache
+
+# IDE-specific files
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.vscode/
+.idea/
+*.swp
+
+# Other package managers
+.yarn
+.yarnrc
+.yarn-integrity
+.pnpm
+.pnpm-debug.log*
+
+# Other miscellaneous caches
+.fusebox/
+.docusaurus/
+.serverless/
+.dynamodb/
+.tern-port
