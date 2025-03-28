@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
-//import fs from "fs/promises";
-//import path from "path";
+import fs from "fs/promises";
+import path from "path";
 
 dotenv.config();
 
@@ -35,85 +35,49 @@ const userSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 
-// Hash password before saving
-userSchema.pre("save", async function (next) {
-    if (this.isModified("passwordHash") || this.isNew) {
-        const salt = await bcrypt.genSalt(10);
-        this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
-    }
-    next();
-});
-
 const User = mongoose.model("User", userSchema);
 
-//  Users
-const users = [
-    { username: "johndoe", email: "johndoe@email.com", firstName: "John", lastName: "Doe", password: "password123", membershipType: { type: "Free" } },
-    { username: "janedoe", email: "janedoe@email.com", firstName: "Jane", lastName: "Doe", password: "password123", membershipType: { type: "Paid" } },
-    { username: "batman", email: "batman@email.com", firstName: "Bruce", lastName: "Wayne", password: "password123", membershipType: { type: "Free" } },
-    { username: "superman", email: "superman@email.com", firstName: "Clark", lastName: "Kent", password: "password123", membershipType: { type: "Paid" } },
-    { username: "spiderman", email: "spiderman@email.com", firstName: "Peter", lastName: "Parker", password: "password123", membershipType: { type: "Free" } },
-    { username: "wonderwoman", email: "wonderwoman@email.com", firstName: "Diana", lastName: "Prince", password: "password123", membershipType: { type: "Paid" } },
-    { username: "hulk", email: "hulk@email.com", firstName: "Bruce", lastName: "Banner", password: "password123", membershipType: { type: "Free" } },
-    { username: "ironman", email: "ironman@email.com", firstName: "Tony", lastName: "Stark", password: "password123", membershipType: { type: "Paid" } },
-    { username: "thor", email: "thor@email.com", firstName: "Thor", lastName: "Odinson", password: "password123", membershipType: { type: "Free" } },
-    { username: "captainamerica", email: "captain@email.com", firstName: "Steve", lastName: "Rogers", password: "password123", membershipType: { type: "Paid" } }
-];
-
-// Insert Users into MongoDB
+// Insert Users into MongoDB using JSON file
 const insertUsers = async () => {
     try {
-        const existingUsers = await User.find();
-        if (existingUsers.length === 0) {
-            // Hash passwords
-            for (let user of users) {
-                const salt = await bcrypt.genSalt(10);
-                user.passwordHash = await bcrypt.hash(user.password, salt);
-                delete user.password; // Remove plain text password
-            }
+        // Read users from JSON file
+        const filePath = path.resolve("data/users.json");
+        const content = await fs.readFile(filePath, "utf-8");
+        const users = JSON.parse(content);
 
-            await User.insertMany(users);
-            console.log("Users Added Successfully!");
-        } else {
-            console.log("Users already exist in database. Skipping user insertion.");
+        // Check if users already exist in the database
+        const existing = await User.find();
+        if (existing.length > 0) {
+            console.log("Users already exist. Skipping insertion.");
+            return;
         }
-    } catch (error) {
-        console.error("Error inserting users:", error.message);
+
+        // Hash passwords and insert users
+        for (const user of users) {
+            const hashedPassword = await bcrypt.hash(user.password, 10);
+            const newUser = new User({
+                username: user.username,
+                email: user.email,
+                passwordHash: hashedPassword,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                membershipType: {
+                    type: user.type,
+                    startDate: new Date(),
+                    endDate: user.type === "Paid" ? new Date(new Date().setFullYear(new Date().getFullYear() + 1)) : null
+                },
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+
+            //Save user in the database
+            await newUser.save();
+            console.log(`Added: ${user.username}`);
+        }
+
+    } catch (err) {
+        console.error("Error loading users:", err.message);
     }
 };
-
-// Function to Import Users from JSON
-/*const importUsers = async () => {
-    try {
-        const filePath = path.resolve("data/users.json");
-        const fileContent = await fs.readFile(filePath, "utf8");
-        const users = JSON.parse(fileContent);
-
-        for (const user of users) {
-            const existingUser = await User.findOne({ email: user.email });
-
-            if (!existingUser) {
-                const passwordHash = await bcrypt.hash(user.password, 10);
-                await User.create({
-                    username: user.username,
-                    email: user.email,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    passwordHash,
-                    membershipType: {
-                        type: user.type,
-                        startDate: new Date(),
-                        endDate: user.type === "Paid" ? new Date(new Date().setFullYear(new Date().getFullYear() + 1)) : null
-                    }
-                });
-                console.log(`User ${user.username} added.`);
-            } else {
-                console.log(`User ${user.username} already exists. Skipping.`);
-            }
-        }
-    } catch (error) {
-        console.error("Failed to import users:", error.message);
-    }
-};*/
 
 export { initDatabase, User, insertUsers };
