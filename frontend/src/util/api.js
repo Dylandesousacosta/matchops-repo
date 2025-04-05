@@ -52,3 +52,39 @@ export async function authenticateUser(authData) {
         return { error: error.message };
     }
 }
+
+// Saves and/or updates Profile Data
+export async function saveProfile(profileData, userId) {
+    try {
+        const response = await fetch(`http://localhost:9000/api/users/${userId}/profile`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(profileData),
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error);
+        return data.profile;
+    } catch (error) {
+        console.error("Error saving profile:", error.message);
+        return null;
+    }
+}
+
+// Get Profile by User ID
+export async function getProfileByUserId(userId) {
+    try {
+        const response = await fetch(`http://localhost:9000/api/users/${userId}/profile`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Failed to fetch profile");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Error fetching profile:", error.message);
+        return null;
+    }
+}
+
