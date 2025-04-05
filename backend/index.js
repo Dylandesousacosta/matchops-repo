@@ -108,6 +108,53 @@ app.get("/api/users/:id", async (req, res) => {
     }
 });
 
+// Save or update User by ID
+app.post("/api/users/:id/profile", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const profileFields = req.body;
+
+        if (!id) {
+            return res.status(400).json({ error: "User ID is required" });
+        }
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        user.profile = profileFields;
+        user.updatedAt = new Date();
+        
+        await user.save();
+
+        res.status(200).json({
+            message: user.profile ? "Profile updated" : "Profile saved successfully",
+            profile: user.profile
+        });
+
+    } catch (error) {
+        console.error("Error saving profile:", error.message);
+        res.status(500).json({ error: "Failed to save profile", details: error.message });
+    }
+});
+
+// Get User Profile by ID
+app.get("/api/users/:id/profile", async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user || !user.profile) {
+            return res.status(404).json({ error: "Profile not found" });
+        }
+
+        res.status(200).json(user.profile);
+    } catch (error) {
+        console.error("Error fetching profile:", error.message);
+        res.status(500).json({ error: "Error fetching profile", details: error.message });
+    }
+});
+
 // Catch-all Route for 404 Errors
 app.use((req, res) => {
     res.status(404).json({ error: "Not Found" });

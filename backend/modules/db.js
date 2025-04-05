@@ -8,7 +8,7 @@ dotenv.config();
 
 // Initialize MongoDB connection
 const initDatabase = async () => {
-    const { DB_USER, DB_PASSWORD, DB_ADDRESS, DB_CLUSTER, DB_NAME } = process.env;
+    const { DB_USER, DB_PASSWORD, DB_ADDRESS, DB_NAME } = process.env;
     const uri = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_ADDRESS}/${DB_NAME}?retryWrites=true&w=majority`;
     try {
         await mongoose.connect(uri);
@@ -30,6 +30,15 @@ const userSchema = new mongoose.Schema({
         type: { type: String, enum: ["Free", "Paid"], default: "Free" },
         startDate: { type: Date, default: Date.now },
         endDate: { type: Date, default: null }
+    },
+    profile: {
+        bio: String,
+        age: Number,
+        gender: String,
+        lookingFor: String,
+        interests: [String],
+        location: String,
+        skills: [String]
     },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
