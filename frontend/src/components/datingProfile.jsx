@@ -19,7 +19,7 @@ function DatingProfile({ user, setProfile, existingProfile }) {
         const profileData = {
             userId: user._id,
             bio,
-            age,
+            age: parseInt(age),
             gender,
             lookingFor,
             interests: interests.split(',').map(item => item.trim()),

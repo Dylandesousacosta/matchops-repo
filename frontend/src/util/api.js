@@ -88,3 +88,63 @@ export async function getProfileByUserId(userId) {
     }
 }
 
+export async function getMatchesForUser(userId) {
+    try {
+        const response = await fetch(`http://localhost:9000/api/matches/${userId}`);
+        
+        if (response.status === 403) {
+            throw new Error("Upgrade your membership to view matches");
+        }
+
+        if (response.status === 400) {
+            throw new Error("No matches found yet. You might need to update your profile.");
+        }
+        
+        if (!response.ok) {
+            throw new Error("Failed to fetch matches");
+        }
+
+        const data = await response.json();
+        
+        if (!Array.isArray(data)) {
+            throw new Error("Matches data is not an array");
+        }
+
+        return data; 
+
+    } catch (error) {
+        console.error("Error fetching matches:", error);
+        return { error: error.message }; 
+    }
+}
+
+export async function submitRating(ratingData) {
+    try {
+        const response = await fetch("/api/rate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(ratingData),
+            credentials: "include", 
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || "Failed to submit rating");
+        }
+
+        return {
+            success: true,
+            message: result.message || "Rating submitted successfully",
+            data: result,
+        };
+    } catch (err) {
+        console.error("Error submitting rating:", err.message);
+        return {
+            success: false,
+            error: err.message || "Something went wrong",
+        };
+    }
+}

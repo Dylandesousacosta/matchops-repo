@@ -2,6 +2,7 @@ import { useState, useEffect, React } from 'react';
 import { getUsers, addUser, authenticateUser, getProfileByUserId } from './util/api';
 import DatingProfile from './components/datingProfile';
 import './App.css';
+import Matches from './components/matches';
 
 function App() {
 
@@ -11,7 +12,7 @@ function App() {
     const [lastName, setLastName] = useState("");
     const [password, setPassword] = useState("");
     const [membershipType, setMembershipType] = useState("Free");
-
+    const [successMessage, setSuccessMessage] = useState(""); 
 
     const [showLogin, setShowLogin] = useState(false);
     const [loginUsername, setLoginUsername] = useState("");
@@ -22,6 +23,7 @@ function App() {
 
     const [showHome, setShowHome] = useState(true);
     const [editingProfile, setEditingProfile] = useState(false);
+    const [showMatches, setShowMatches] = useState(false);
 
     useEffect(() => {
         async function fetchData() {
@@ -41,7 +43,7 @@ function App() {
         const newUser = await addUser(userData);
 
         if (newUser && newUser.user && newUser.user._id) {
-            alert("User added successfully!");
+            setSuccessMessage("User added successfully!"); 
 
             setUsername("");
             setEmail("");
@@ -66,8 +68,7 @@ function App() {
         const response = await authenticateUser({ username: loginUsername, password: loginPassword });
 
         if (response.message === "User authenticated successfully") {
-            alert("Login successful!");
-
+            setSuccessMessage("Login successful!");
 
             const users = await getUsers();
             const user = users.find(u => u.username === loginUsername);
@@ -120,7 +121,17 @@ function App() {
                         <p><strong>Interests:</strong> {profile.interests.join(', ')}</p>
                         <p><strong>Location:</strong> {profile.location}</p>
                         <p><strong>Skills:</strong> {profile.skills.join(', ')}</p>
-                        <button onClick={() => setEditingProfile(true)}>Update Profile</button>
+                        {profile && (
+                        <>
+                            <button onClick={() => setEditingProfile(true)}>Update Profile</button>
+                            <br></br>
+                            <br></br>
+                            <button onClick={() => setShowMatches(!showMatches)}>
+                                {showMatches ? "Hide Matches" : "Find Matches"}
+                            </button>
+                        </>
+                        )}
+                        {showMatches && <Matches currentUser={loggedInUser} />}
                     </div>
                 ) : (
                     <>
@@ -200,6 +211,9 @@ function App() {
                         Already have an account?{" "}
                         <button onClick={() => setShowLogin(true)}>Sign In</button>
                     </p>
+
+                    {successMessage && <div className="success-message">{successMessage}</div>} {/* Here */}
+
                 </>
             )}
         </div>
