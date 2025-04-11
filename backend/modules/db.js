@@ -41,7 +41,16 @@ const userSchema = new mongoose.Schema({
         skills: [String]
     },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
+    ratings: [
+        {
+          fromUserId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+          toUserId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+          stars: { type: Number, required: true },
+          comment: { type: String },
+          ratedAt: { type: Date, default: Date.now }
+        }
+      ]
 });
 
 const User = mongoose.model("User", userSchema);

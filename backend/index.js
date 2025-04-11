@@ -155,6 +155,87 @@ app.get("/api/users/:id/profile", async (req, res) => {
     }
 });
 
+app.get("/api/matches/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await User.findById(id);
+        if (!user || !user.profile) {
+            return res.status(404).json({ error: "User or user profile not found" });
+        }
+
+        // Check if the user is allowed to access matches
+        const allowedMemberships = ["Paid"];
+        if (!allowedMemberships.includes(user.membershipType.type)) {
+            console.error("User does not have permission to view matches:", user.membershipType.type);
+            return res.status(403).json({ error: "Upgrade your membership to view matches" });
+        }
+
+        const { gender, lookingFor, interests, skills, location } = user.profile;
+
+        // Ensure user has a complete profile
+        if (!gender || !lookingFor || !interests || !skills || !location) {
+            return res.status(400).json({ error: "Complete your profile to find matches." });
+        }
+
+        const matchesQuery = {
+            _id: { $ne: user._id }, // Exclude the current user
+            "profile.lookingFor": lookingFor, // Match lookingFor
+            "profile.location": location, // Match location
+            $or: [
+                { "profile.interests": { $in: interests } },
+                { "profile.skills": { $in: skills } }
+            ],
+        };
+
+        // Find matches in the database
+        const matches = await User.find(matchesQuery);
+
+        console.log("Matches :", matches);
+        console.log("Matches Query:", matchesQuery);
+
+        res.status(200).json(matches.length ? matches.map((match) => ({
+            _id: match._id,
+            username: match.username,
+            email: match.email,
+            profile: match.profile
+        })) : []);
+
+    } catch (error) {
+        console.error("Error fetching matches:", error);  // Log the error
+        res.status(500).json({ error: "Failed to fetch matches", details: error.message });
+    }
+});
+
+app.post("/api/rate", async (req, res) => {
+    const { fromUserId, toUserId, stars, comment } = req.body;
+  
+    if (!fromUserId || !toUserId || !stars) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+  
+    try {
+      // Find the user being rated
+      const ratedUser = await User.findById(toUserId);
+      if (!ratedUser) return res.status(404).json({ error: "User not found" });
+  
+      // Optional: prevent double rating (could use a separate Rating model for more control)
+      const alreadyRated = ratedUser.ratings?.find(
+        (r) => r.fromUserId.toString() === fromUserId
+      );
+      if (alreadyRated) return res.status(409).json({ error: "Already rated" });
+  
+      // Add the new rating
+      ratedUser.ratings.push({ fromUserId, toUserId, stars, comment });
+      await ratedUser.save();
+  
+      res.status(200).json({ success: true, message: "Rating submitted" });
+    } catch (err) {
+      console.error("Error submitting rating:", err);
+      res.status(500).json({ error: "Server error submitting rating" });
+    }
+  });  
+
 // Catch-all Route for 404 Errors
 app.use((req, res) => {
     res.status(404).json({ error: "Not Found" });
