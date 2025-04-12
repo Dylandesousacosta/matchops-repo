@@ -10,8 +10,12 @@ dotenv.config(); // Load environment variables
 const app = express();
 const port = process.env.PORT || 9000;
 
-app.use(cors());
-app.use(express.json()); // Middleware to parse JSON requests
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        credentials: true,
+    })
+); app.use(express.json());
 
 // Connect to MongoDB using Mongoose
 initDatabase()
@@ -125,7 +129,7 @@ app.post("/api/users/:id/profile", async (req, res) => {
 
         user.profile = profileFields;
         user.updatedAt = new Date();
-        
+
         await user.save();
 
         res.status(200).json({
@@ -180,7 +184,7 @@ app.get("/api/matches/:id", async (req, res) => {
 
         const matchesQuery = {
             _id: { $ne: user._id }, // Exclude the current user
-            "profile.lookingFor": lookingFor, // Match lookingFor
+            "profile.lookingFor": gender, // Match lookingFor
             "profile.location": location, // Match location
             $or: [
                 { "profile.interests": { $in: interests } },
@@ -198,7 +202,8 @@ app.get("/api/matches/:id", async (req, res) => {
             _id: match._id,
             username: match.username,
             email: match.email,
-            profile: match.profile
+            profile: match.profile,
+            hasRated: match.ratings?.some(r => r.fromUserId.toString() === user._id.toString())
         })) : []);
 
     } catch (error) {
@@ -209,32 +214,58 @@ app.get("/api/matches/:id", async (req, res) => {
 
 app.post("/api/rate", async (req, res) => {
     const { fromUserId, toUserId, stars, comment } = req.body;
-  
+
     if (!fromUserId || !toUserId || !stars) {
-      return res.status(400).json({ error: "Missing required fields" });
+        return res.status(400).json({ error: "Missing required fields" });
     }
-  
+
     try {
-      // Find the user being rated
-      const ratedUser = await User.findById(toUserId);
-      if (!ratedUser) return res.status(404).json({ error: "User not found" });
-  
-      // Optional: prevent double rating (could use a separate Rating model for more control)
-      const alreadyRated = ratedUser.ratings?.find(
-        (r) => r.fromUserId.toString() === fromUserId
-      );
-      if (alreadyRated) return res.status(409).json({ error: "Already rated" });
-  
-      // Add the new rating
-      ratedUser.ratings.push({ fromUserId, toUserId, stars, comment });
-      await ratedUser.save();
-  
-      res.status(200).json({ success: true, message: "Rating submitted" });
+        // Find the user being rated
+        const ratedUser = await User.findById(toUserId);
+        if (!ratedUser) return res.status(404).json({ error: "User not found" });
+
+        // Optional: prevent double rating (could use a separate Rating model for more control)
+        const alreadyRated = ratedUser.ratings?.find(
+            (r) => r.fromUserId.toString() === fromUserId
+        );
+        if (alreadyRated) return res.status(409).json({ error: "Already rated" });
+
+        // Add the new rating
+        ratedUser.ratings.push({ fromUserId, toUserId, stars, comment });
+        await ratedUser.save();
+
+        res.status(200).json({ success: true, message: "Rating submitted" });
     } catch (err) {
-      console.error("Error submitting rating:", err);
-      res.status(500).json({ error: "Server error submitting rating" });
+        console.error("Error submitting rating:", err);
+        res.status(500).json({ error: "Server error submitting rating" });
     }
-  });  
+});
+
+// Update User by ID
+app.put("/api/users/:id", async (req, res) => {
+    try {
+        const updated = await User.findByIdAndUpdate(
+            req.params.id,
+            {
+                $set: {
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    email: req.body.email,
+                    membershipType: req.body.membershipType,
+                    updatedAt: new Date(),
+                },
+            },
+            { new: true }
+        );
+
+        if (!updated) return res.status(404).json({ error: "User not found" });
+
+        res.status(200).json({ message: "User updated", user: updated });
+    } catch (error) {
+        console.error("Update user failed:", error.message);
+        res.status(500).json({ error: "Failed to update user", details: error.message });
+    }
+});
 
 // Catch-all Route for 404 Errors
 app.use((req, res) => {
