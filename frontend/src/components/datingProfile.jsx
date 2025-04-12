@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { saveProfile } from "../util/api";
 
-function DatingProfile({ user, setProfile, existingProfile }) {
+function DatingProfile({ user, setProfile, existingProfile, setEditingProfile  }) {
     const [bio, setBio] = useState(existingProfile?.bio || "");
     const [age, setAge] = useState(existingProfile?.age || "");
     const [gender, setGender] = useState(existingProfile?.gender || "Male");
@@ -9,6 +9,10 @@ function DatingProfile({ user, setProfile, existingProfile }) {
     const [interests, setInterests] = useState((existingProfile?.interests || []).join(","));
     const [location, setLocation] = useState(existingProfile?.location || "");
     const [skills, setSkills] = useState((existingProfile?.skills || []).join(","));
+
+    const handleCancel = () => {
+        setEditingProfile(false);
+      };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -64,7 +68,7 @@ function DatingProfile({ user, setProfile, existingProfile }) {
                     <option>Other</option>
                 </select>
 
-                <label>Select who you are looking for</label>
+                <label>Looking For</label>
                 <select value={lookingFor} onChange={(e) => setLookingFor(e.target.value)}>
                     <option>Male</option>
                     <option>Female</option>
@@ -126,7 +130,12 @@ function DatingProfile({ user, setProfile, existingProfile }) {
                     <option>Fitness</option>
                 </select>
 
-                <button type="submit">Save Profile</button>
+                <div className="profile-buttons">
+                    <button type="submit" className="match-button">Save Profile</button>
+                    <button type="button" className="match-button" onClick={handleCancel}>
+                        Cancel
+                    </button>
+                </div>
             </form>
 
         </div>

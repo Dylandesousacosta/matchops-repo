@@ -12,7 +12,7 @@ function App() {
     const [lastName, setLastName] = useState("");
     const [password, setPassword] = useState("");
     const [membershipType, setMembershipType] = useState("Free");
-    const [successMessage, setSuccessMessage] = useState(""); 
+    const [successMessage, setSuccessMessage] = useState("");
 
     const [showLogin, setShowLogin] = useState(false);
     const [loginUsername, setLoginUsername] = useState("");
@@ -43,7 +43,7 @@ function App() {
         const newUser = await addUser(userData);
 
         if (newUser && newUser.user && newUser.user._id) {
-            setSuccessMessage("User added successfully!"); 
+            setSuccessMessage("User added successfully!");
 
             setUsername("");
             setEmail("");
@@ -121,17 +121,11 @@ function App() {
                         <p><strong>Interests:</strong> {profile.interests.join(', ')}</p>
                         <p><strong>Location:</strong> {profile.location}</p>
                         <p><strong>Skills:</strong> {profile.skills.join(', ')}</p>
-                        {profile && (
-                        <>
-                            <button onClick={() => setEditingProfile(true)}>Update Profile</button>
-                            <br></br>
-                            <br></br>
-                            <button onClick={() => setShowMatches(!showMatches)}>
-                                {showMatches ? "Hide Matches" : "Find Matches"}
-                            </button>
-                        </>
-                        )}
-                        {showMatches && <Matches currentUser={loggedInUser} />}
+                        <button className="match-button" onClick={() => setEditingProfile(true)}>Update Profile</button>
+                        <button className="match-button" onClick={() => setShowMatches(!showMatches)}>
+                            {showMatches ? "Hide Matches" : "Find Matches"}
+                        </button>
+                        {showMatches && <Matches currentUser={loggedInUser} setLoggedInUser={setLoggedInUser} />}
                     </div>
                 ) : (
                     <>
@@ -143,6 +137,7 @@ function App() {
                                 setEditingProfile(false);
                             }}
                             existingProfile={profile}
+                            setEditingProfile={setEditingProfile}
                         />
                     </>
                 )}

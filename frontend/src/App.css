@@ -27,13 +27,19 @@ input {
 }
 
 button {
-  padding: 10px 15px;
+  padding: 0.9rem;
   font-size: 16px;
+  font-weight: 600;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 200px;
+  display: block;
+  margin: 0.5rem auto;
+  text-align: center;
 }
 
 button:hover {
@@ -50,8 +56,8 @@ button:hover {
 
 .logout-button {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 0;
+  right: 0.3rem;
   padding: 8px 14px 8px 14px;
   font-size: 14px;
   background-color: #dc3545;
@@ -59,6 +65,7 @@ button:hover {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  width: 100px;
 }
 
 .logout-button:hover {
@@ -121,18 +128,123 @@ button:hover {
   font-size: 1rem;
 }
 
-.dating-profile-container button {
-  display: block;
-  width: 100%;
-  padding: 0.9rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
+.profile-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
-.dating-profile-container button:hover {
-  background-color: #0056b3;
+/* ================= Matching Styles ================= */
+
+.match-card {
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 2px solid #666967;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  background-color: white;
+}
+
+.match-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #4f46e5;
+  margin-bottom: 0.5rem;
+}
+
+.match-button.rate {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.match-button.rate:hover {
+  background-color: #d97706;
+}
+
+/* ==== Star Rating ==== */
+.star-rating {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin: 1rem 0;
+  font-size: 1.5rem;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.star-rating button {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  cursor: pointer;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.star-rating button:hover {
+  transform: scale(1.15);
+  color:khaki
+}
+
+.star-rating .filled {
+  color: #ffc107;
+}
+
+.star-rating .empty {
+  color: #e0e0e0;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.upgrade-button {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.upgrade-button:hover {
+  background-color: #059669;
+}
+
+.match-button.rated {
+  background-color: #22c55e; /* green */
+  color: white;
+  cursor: default;
+  font-weight: bold;
 }

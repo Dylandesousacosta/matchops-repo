@@ -120,16 +120,22 @@ export async function getMatchesForUser(userId) {
 
 export async function submitRating(ratingData) {
     try {
-        const response = await fetch("/api/rate", {
+        const response = await fetch("http://localhost:9000/api/rate", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(ratingData),
-            credentials: "include", 
+            credentials: "include",
         });
 
-        const result = await response.json();
+        const text = await response.text(); // Safely read raw text
+        let result = {};
+        try {
+            result = text ? JSON.parse(text) : {};
+        } catch (jsonErr) {
+            console.error("Failed to parse JSON:", jsonErr.message);
+        }
 
         if (!response.ok) {
             throw new Error(result.error || "Failed to submit rating");
@@ -146,5 +152,26 @@ export async function submitRating(ratingData) {
             success: false,
             error: err.message || "Something went wrong",
         };
+    }
+}
+
+export async function updateUserInfo(userId, updateData) {
+    try {
+        const response = await fetch(`http://localhost:9000/api/users/${userId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updateData),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || "Failed to update user");
+
+        return data.user;
+    } catch (error) {
+        console.error("Error updating user:", error.message);
+        return null;
     }
 }
