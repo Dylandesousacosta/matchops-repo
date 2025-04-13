@@ -121,6 +121,7 @@ function App() {
                         <p><strong>Interests:</strong> {profile.interests.join(', ')}</p>
                         <p><strong>Location:</strong> {profile.location}</p>
                         <p><strong>Skills:</strong> {profile.skills.join(', ')}</p>
+                        <p><strong>Average Rating:</strong> {profile.averageRating} ({profile.totalRatings} ratings)</p>
                         <button className="match-button" onClick={() => setEditingProfile(true)}>Update Profile</button>
                         <button className="match-button" onClick={() => setShowMatches(!showMatches)}>
                             {showMatches ? "Hide Matches" : "Find Matches"}
