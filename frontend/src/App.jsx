@@ -3,6 +3,7 @@ import { getUsers, addUser, authenticateUser, getProfileByUserId } from './util/
 import DatingProfile from './components/datingProfile';
 import './App.css';
 import Matches from './components/matches';
+import AdminDashboard from "./components/adminDashboard";
 
 function App() {
 
@@ -68,20 +69,22 @@ function App() {
         const response = await authenticateUser({ username: loginUsername, password: loginPassword });
 
         if (response.message === "User authenticated successfully") {
-            setSuccessMessage("Login successful!");
+            localStorage.setItem("token", response.token);
+            const user = response.user; 
 
-            const users = await getUsers();
-            const user = users.find(u => u.username === loginUsername);
+            if (user.role === "admin") {
+                setLoggedInUser(user);
+                return;
+            }
+
             setLoggedInUser(user);
             setLoginUsername("");
             setLoginPassword("");
-            //setShowLogin(false);
+
             try {
                 const profile = await getProfileByUserId(user._id);
-                console.log("User profile:", profile);
                 setProfile(profile);
             } catch (error) {
-                console.log("No profile found yet.");
                 setProfile(null);
             }
         } else {
@@ -89,7 +92,17 @@ function App() {
         }
     }
 
+    // Admin View
+    if (loggedInUser?.role === "admin") {
+        return <AdminDashboard handleLogout={() => {
+            localStorage.removeItem("token");
+            setLoggedInUser(null);
+            setShowLogin(true);
+            setShowHome(false);
+        }} />;
+    }
 
+    // Logged in User view
     if (loggedInUser) {
         return (
             <div className="welcome-container">
