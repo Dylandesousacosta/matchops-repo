@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
+import jwt from "jsonwebtoken";
+import { ObjectId } from "mongodb";
 import { initDatabase, User, insertUsers } from "./modules/db.js";
 import bcrypt from "bcrypt";
 import { createUser, updateUser } from "./modules/schema.js";
@@ -16,6 +18,19 @@ app.use(
         credentials: true,
     })
 ); app.use(express.json());
+
+// JWT Verification Middleware
+function verifyToken(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: "Missing token" });
+
+    const token = authHeader.split(" ")[1];
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) return res.status(403).json({ error: "Invalid token" });
+        req.user = decoded;
+        next();
+    });
+}
 
 // Connect to MongoDB using Mongoose
 initDatabase()
@@ -90,12 +105,48 @@ app.post("/api/authenticate", async (req, res) => {
             return res.status(401).json({ error: "Invalid username or password" });
         }
 
-        res.status(200).json({ message: "User authenticated successfully" });
+        const token = jwt.sign(
+            { id: user._id, role: user.role || "user" },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        res.status(200).json({
+            message: "User authenticated successfully",
+            token,
+            user: {
+                _id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role || "user",
+                membershipType: user.membershipType
+            }
+        });
 
     } catch (error) {
         console.error("Authentication failed:", error.message);
         res.status(500).json({ error: "Error authenticating user", details: error.message });
     }
+});
+
+
+// Admin-only statistics route
+app.get("/api/admin/stats", verifyToken, async (req, res) => {
+    try {
+        const user = await User.findOne({ _id: new ObjectId(req.user.id) });
+        if (!user || user.role !== "admin") {
+          return res.status(403).json({ error: "Access denied" });
+        }
+    
+        const total = await User.countDocuments();
+        const active = await User.countDocuments({ lastLogin: { $gte: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7) } });
+        const paid = await User.countDocuments({ "membershipType.type": "Paid" });
+        const free = await User.countDocuments({ "membershipType.type": "Free" });
+    
+        res.json({ total, active, paid, free });
+      } catch (e) {
+        res.status(500).json({ error: e.message });
+      }
 });
 
 // Get User by ID
@@ -252,15 +303,18 @@ app.post("/api/rate", async (req, res) => {
 // Update User by ID
 app.put("/api/users/:id", async (req, res) => {
     try {
+        const { firstName, lastName, email, membershipType, role } = req.body;
+
         const updated = await User.findByIdAndUpdate(
             req.params.id,
             {
                 $set: {
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    email: req.body.email,
-                    membershipType: req.body.membershipType,
+                    firstName,
+                    lastName,
+                    email,
+                    membershipType,
                     updatedAt: new Date(),
+                    ...(role && { role }) // Only set role if it's present
                 },
             },
             { new: true }
@@ -274,6 +328,32 @@ app.put("/api/users/:id", async (req, res) => {
         res.status(500).json({ error: "Failed to update user", details: error.message });
     }
 });
+
+app.patch("/api/users/:id/role", async (req, res) => {
+    try {
+      const { role } = req.body;
+      const updated = await User.findByIdAndUpdate(
+        req.params.id,
+        { $set: { role } },
+        { new: true }
+      );
+      res.json(updated);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to update role", details: err.message });
+    }
+});
+
+// Delete user by ID
+app.delete("/api/users/:id", async (req, res) => {
+    try {
+      const result = await User.findByIdAndDelete(req.params.id);
+      if (!result) return res.status(404).json({ error: "User not found" });
+      res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete user", details: error.message });
+    }
+});
+  
 
 // Catch-all Route for 404 Errors
 app.use((req, res) => {

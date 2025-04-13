@@ -78,5 +78,14 @@
         "lastName": "Jordan",
         "password": "lanternRing",
         "type": "Free"
+    },
+    {
+        "username": "admin",
+        "email": "admin@example.com",
+        "firstName": "Admin",
+        "lastName": "User",
+        "password": "adminpass",
+        "type": "Paid",
+        "role": "admin"
     }
 ]

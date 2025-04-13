@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema({
         startDate: { type: Date, default: Date.now },
         endDate: { type: Date, default: null }
     },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
     profile: {
         bio: String,
         age: Number,
@@ -84,6 +85,7 @@ const insertUsers = async () => {
                     startDate: new Date(),
                     endDate: user.type === "Paid" ? new Date(new Date().setFullYear(new Date().getFullYear() + 1)) : null
                 },
+                role: user.role || "user", // <-- This sets "admin" if present, else defaults to "user"
                 createdAt: new Date(),
                 updatedAt: new Date()
             });
