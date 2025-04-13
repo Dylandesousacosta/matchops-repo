@@ -152,7 +152,15 @@ app.get("/api/users/:id/profile", async (req, res) => {
             return res.status(404).json({ error: "Profile not found" });
         }
 
-        res.status(200).json(user.profile);
+        // Calculate average rating
+        const totalRatings = user.ratings.length;
+        const avgRating = totalRatings ? user.ratings.reduce((sum, r) => sum + r.stars, 0) / totalRatings : null;
+
+        res.status(200).json({
+            ...user.profile,
+            averageRating: avgRating ? avgRating.toFixed(1) : "Not rated",
+            totalRatings
+        });
     } catch (error) {
         console.error("Error fetching profile:", error.message);
         res.status(500).json({ error: "Error fetching profile", details: error.message });
